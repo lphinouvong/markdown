@@ -82,9 +82,11 @@ Après avoir entré le mot de passe que vous venez de définir, vous verrez l'in
 
 1. taper `sudo apt install php-fpm php-mysql`
 
-2. Il va falloir copié le fichier default de configuration bloc server à présent. Pour cela taper `cd /etc/nginx/sites-available/` et faite `ls` pour voir le fichier default présent. Il faut le copié, pour cela on fait `sudo cp default nomDeLaCopie` refaite ensuite un `ls` pour visualiser la copie réaliser. A partir de maintenant il va falloir modifier la copie en tapant `sudo nano nomDeLaCopie` Une fois à l'interieur déplacer vous avec les flèches directionel et aller la ou ce trouve la ligne `index index.html index.html index.nginx-debian.html;` et ajouter `index.php` juste après le premier `index`. Ensuite aller à la ligne `location ~ \.php$ {` et supprimé le symbole `#` qui se situe devant cete ligne (c'est ce qui met le code en commentaire) supprimé le même symbole de la ligne juste en dessous et celle de la ligne `fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;` et modifier cette ligne mettre `php7.2` au lieu de `php7.0` Puis descendre supprimé le même symbole `#` devant la fermeture de l'accolade de la location dans laquelle on ce situe. Supprimé également ce symbole devantla ligne `location ~ /\.ht {` et la fermeture de la même manière que pour la précédente. Voilà le fichier et modifier il faut maintenant le fermer et l'enregistrer en tapan `CTRL+X` et faire `y` et `ENTER`.
+2. Il va falloir copié le fichier default de configuration bloc server à présent. Pour cela taper `cd /etc/nginx/sites-available/` et faite `ls` pour voir le fichier default présent. Il faut le copié, pour cela on fait `sudo cp default nomDeLaCopie` refaite ensuite un `ls` pour visualiser la copie réaliser. A partir de maintenant il va falloir modifier la copie en tapant `sudo nano nomDeLaCopie` Une fois à l'interieur déplacer vous avec les flèches directionel allez a la ligne `root /var/www/html` et ajouter à la suite du `html` ceci : `html/public` et aller la ou ce trouve la ligne `index index.html index.html index.nginx-debian.html;` et ajouter `index.php` juste après le premier `index`. Ensuite aller à la ligne `location ~ \.php$ {` et supprimé le symbole `#` qui se situe devant cete ligne (c'est ce qui met le code en commentaire) supprimé le même symbole de la ligne juste en dessous et celle de la ligne `fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;` et modifier cette ligne mettre `php7.2` au lieu de `php7.0` Puis descendre supprimé le même symbole `#` devant la fermeture de l'accolade de la location dans laquelle on ce situe. Supprimé également ce symbole devantla ligne `location ~ /\.ht {` et la fermeture de la même manière que pour la précédente. Voilà le fichier et modifier il faut maintenant le fermer et l'enregistrer en tapan `CTRL+X` et faire `y` et `ENTER`.
 
 3. Activez votre nouveau bloc serveur en créant un lien symbolique de votre nouveau fichier de configuration de bloc serveur (dans le /etc/nginx/sites-available/répertoire) vers le /etc/nginx/sites-enabled/répertoire en tapant `sudo ln -s /etc/nginx/sites-available/nomDeLaCopie /etc/nginx/sites-enabled/` Ensuite, dissociez le fichier de configuration par défaut du /sites-enabled/répertoire en tapant `sudo unlink /etc/nginx/sites-enabled/default` Et testez votre nouveau fichier de configuration pour les erreurs de syntaxe en tapant `sudo nginx -t` Si des erreurs sont signalées, revenez en arrière et revérifiez votre fichier avant de continuer. Lorsque vous êtes prêt, rechargez Nginx pour apporter les modifications nécessaires en faisant `sudo systemctl reload nginx`
+
+(a tester `sudo service nginx restart`)
 
 ## Création d'un fichier PHP pour tester la configuration
 
@@ -97,3 +99,52 @@ phpinfo();
 Allez sur votre navigateur et faite `127.0.0.1:8080/info.php` Si la page s'affiche c'est que ça fonctionne bien sinon il est possible que les étapes précédente non pas été réaliser comme il faut.
 
 Si tout cela fonctionne bien on peut supprimer le fichier info.php en tapant `sudo rm /var/www/html/info.php`
+
+Puis installer les dépendances de php7.2 en tapant 
+> sudo apt install php7.2-common php7.2-cli php7.2-gd php7.2-mysql php7.2-curl php7.2-intl php7.2-mbstring php7.2-bcmath php7.2-imap php7.2-xml php7.2-zip
+
+## Installer Composer
+
+Effectuer ces commande
+
+> sudo php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+> sudo php -r "if (hash_file('sha384', 'composer-setup.php') === 'e0012edf3e80b6978849f5eff0d4b4e4c79ff1609dd1e613307e16318854d24ae64f26d17af3ef0bf7cfb710ca74755a') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+
+> sudo php composer-setup.php
+
+> sudo php -r "unlink('composer-setup.php');"
+
+Puis faire `sudo mv composer.phar /usr/local/bin/composer`
+
+Et `cd /var/www/html/`
+
+Ensuite cloner le repo en faisant `sudo git clone https://github.com/aurelie-parcero/Pimp-my-shoes.git`
+ Allez à la racine en tapan `cd ../../../`
+
+Et faire
+> chmod -R 777 /var/www/html/Pimp-my-shoes
+
+Puis retourner dans le projet en tapan `cd /var/www/html/Pimp-my-shoes`
+
+Et installer composer en tapan `composer install`
+
+Générer la clé avec `sudo php artisan key:generate`
+
+Il faut maintenant copié le fichier `.env.exemple` en `.env` en faisan `sudo cp .env.example .env` et le modifier donc taper `sudo nano .env`.
+
+Il faut maintenant renseigner les champs DB_DATABASE, DB_USERNAME, DB_PASSWORD.
+
+Enregistrer le fichier comme tout à l'heur en faisan `CTRL+X` et `y` puis `ENTER`
+
+Maintenant faite `mysql -u root -p
+` pour entrer dans mysql
+
+Il faut crée la base de donné faite `CREATE DATABASE pimp_my_shoes`
+
+Crée un nouvelle utilisateur ayant le même DB_USERNAME et DB_PASSWORD que dans le .env
+faite `CREATE USER ‘pikachu’@‘localhost’ IDENTIFIED BY 'pikapika';`
+
+Ensuite il faut lui donner les privilèges`GRANT ALL ON pimp_my_shoes.* TO 'pikachu'@'localhost' IDENTIFIED BY 'pikapika' WITH GRANT OPTION;`
+
+Et ensuite il suffit de sortir de mysql avec `exit` et faire un `sudo php artisan migrate`
