@@ -1,5 +1,5 @@
 # Install Project Laravel
-Ok super
+Ok super chouette!
 ## Télécharger
 
 > Putty https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.73-installer.msi
